@@ -46,10 +46,18 @@ def planet_constellation(bot, update):
 def word_counter(bot, update):
     user_text_get = update.message.text
     cutted_user_input = user_text_get[11:]
-    if cutted_user_input[0] != "\"" or cutted_user_input[-1] != "\"":
-        print ('Сорян, нужно брать в кавычки стрингу. Попробуйте еще раз')
 
-    
+    if cutted_user_input[0] != "\"" or cutted_user_input[-1] != "\"":
+        update.message.reply_text('Сорян, нужно брать в кавычки стрингу. Попробуйте еще раз')
+    else:
+        user_string_no_quotas = cutted_user_input[1:-2]
+        user_string_list = user_string_no_quotas.split()
+
+        if not user_string_list:
+            update.message.reply_text("Стринга пустая")
+        else:
+            update.message.reply_text("Ваша стринга состоит из %d слов." % len(user_string_list))
+
 
 
 
