@@ -18,6 +18,7 @@ def main():
     dp.add_handler(CommandHandler("start", greet_user))
     dp.add_handler(CommandHandler("planet", planet_constellation))
     dp.add_handler(MessageHandler(Filters.text, talk_to_me))
+    dp.add_handler(CommandHandler("wordcount", word_counter))
 
     updater.start_polling()
     updater.idle()
@@ -41,6 +42,16 @@ def planet_constellation(bot, update):
         update.message.reply_text('Планета %s сейчас находится в созвездии %s' % (cutted_user_input, ephem.constellation(ephem_planet)[1]))
     except AttributeError:
         update.message.reply_text('Сорян, такой планеты пока не открыли')
+
+def word_counter(bot, update):
+    user_text_get = update.message.text
+    cutted_user_input = user_text_get[11:]
+    if cutted_user_input[0] != "\"" or cutted_user_input[-1] != "\"":
+        print ('Сорян, нужно брать в кавычки стрингу. Попробуйте еще раз')
+
+    
+
+
 
 if __name__ == '__main__':
     main()
