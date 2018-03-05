@@ -15,9 +15,9 @@ def main():
     updater = Updater(token)
 
     dp = updater.dispatcher
+    dp.add_handler(MessageHandler(Filters.text, talk_to_me))
     dp.add_handler(CommandHandler("start", greet_user))
     dp.add_handler(CommandHandler("planet", planet_constellation))
-    dp.add_handler(MessageHandler(Filters.text, talk_to_me))
     dp.add_handler(CommandHandler("wordcount", word_counter))
     dp.add_handler(CommandHandler("dict_calc", dict_calculator))
     dp.add_handler(CommandHandler("simple_calc", simple_calculator))
@@ -81,9 +81,11 @@ def simple_calculator(bot, update):
         else:
             try:
                 final = eval(''.join(user_string_list))
-                update.message.reply_text(final)
+                update.message.reply_text(round(final, 2))
             except NameError:
                 update.message.reply_text('Было бы неплохо использовать числа для арифметических операций')
+            except ZeroDivisionError:
+                update.message.reply_text('На нолик мы не делим!')
 
 def dict_calculator(bot, update):
     all_numbers = {
@@ -114,7 +116,7 @@ def dict_calculator(bot, update):
     cutted_user_input = user_input[11:]
     user_input_noquotas = cutted_user_input[1:-1]
     input_list = user_input_noquotas.split()
-    
+
     for i in input_list:
         if i in all_numbers.keys():
             result_list.append(all_numbers.get(i))
