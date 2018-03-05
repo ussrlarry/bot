@@ -113,9 +113,9 @@ def dict_calculator(bot, update):
     input_list = []
 
     user_input = update.message.text
-    cutted_user_input = user_input[11:]
-    user_input_noquotas = cutted_user_input[1:-1]
-    input_list = user_input_noquotas.split()
+    cutted_string = user_input[11:]
+    delete_quotas = cutted_string[1:-1]
+    input_list = delete_quotas.split()
 
     for i in input_list:
         if i in all_numbers.keys():
