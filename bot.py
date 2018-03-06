@@ -2,7 +2,7 @@ from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 import ephem
 import time
 import logging
-
+from telepot.namedtuple import ReplyKeyboardMarkup
 
 logging.basicConfig(format='%(name)s - %(levelname)s - %(message)s',
                     level=logging.DEBUG,
@@ -13,6 +13,7 @@ def main():
     f = open("token.file","r")
     token = f.readline().rstrip()
     updater = Updater(token)
+
 
     dp = updater.dispatcher
     dp.add_handler(MessageHandler(Filters.text, talk_to_me))
@@ -63,7 +64,6 @@ def word_counter(bot, update):
 def simple_calculator(bot, update):
     user_input = update.message.text
     cutted_user_input = user_input[13:]
-    user_string_list = []
 
     if cutted_user_input[0] != "\"" or cutted_user_input[-1] != "\"":
         update.message.reply_text('Сорян, нужно брать в кавычки стрингу. Попробуйте еще раз')
@@ -71,21 +71,48 @@ def simple_calculator(bot, update):
         update.message.reply_text('Арфиметическое выражение должно заканчиваться на "=" и не должно быть пустым')
     else:
         user_string_no_quotas = cutted_user_input[1:-2]
-        user_string_cutted = str(user_string_no_quotas)
 
-        for i in user_string_cutted:
-            user_string_list.append(i)
+    def calculator(string):
+        no_spaces_string = string.lower().replace(" ", "")
+        parts = no_spaces_string.split("+")
 
-        if len(user_string_list) < 3:
-            update.message.reply_text("Нужно ввести 2 числа для выполнения операции")
-        else:
-            try:
-                final = eval(''.join(user_string_list))
-                update.message.reply_text(round(final, 2))
-            except NameError:
-                update.message.reply_text('Было бы неплохо использовать числа для арифметических операций')
-            except ZeroDivisionError:
-                update.message.reply_text('На нолик мы не делим!')
+        try:
+            for i in range(len(parts)):
+                if "-" in parts[i]:
+                    parts[i] = parts[i].split("-")
+
+            for i in range(len(parts)):
+                parts[i] = precalculator(parts[i])
+
+            result = sum(parts)
+        except ValueError:
+            result = ("Не надо использовать неправильный тип данных")
+        except ZeroDivisionError:
+            result = ("На нолик мы не делим")
+
+        return result
+
+    def precalculator(part):
+        if type(part) is str:
+            if "*" in part:
+                result = 1
+                for subpart in part.split("*"):
+                    result *= precalculator(subpart)
+                return result
+            elif "/" in part:
+                parts = list(map(precalculator, part.split("/")))
+                result = parts[0]
+                for subpart in parts[1:]:
+                    result /= subpart
+                return result
+            else:
+                return float(part)
+        elif type(part) is list:
+            for i in range(len(part)):
+                part[i] = precalculator(part[i])
+            return part[0] - sum(part[1:])
+
+    update.message.reply_text(calculator(user_string_no_quotas))
 
 def dict_calculator(bot, update):
     all_numbers = {
@@ -110,7 +137,6 @@ def dict_calculator(bot, update):
         }
 
     result_list = []
-    input_list = []
 
     user_input = update.message.text
     cutted_string = user_input[11:]
@@ -120,11 +146,51 @@ def dict_calculator(bot, update):
     for i in input_list:
         if i in all_numbers.keys():
             result_list.append(all_numbers.get(i))
-    try:
-        final = eval(''.join(result_list))
-        update.message.reply_text(round(final, 2))
-    except ZeroDivisionError:
-        update.message.reply_text('На нолик мы не делим!')
+
+    string_to_calc = ''.join(result_list)
+
+    def calculator(string):
+        no_spaces_string = string.lower().replace(" ", "")
+        parts = no_spaces_string.split("+")
+
+        try:
+            for i in range(len(parts)):
+                if "-" in parts[i]:
+                    parts[i] = parts[i].split("-")
+
+            for i in range(len(parts)):
+                parts[i] = precalculator(parts[i])
+
+            result = sum(parts)
+        except ValueError:
+            result = ("Не надо использовать неправильный тип данных")
+        except ZeroDivisionError:
+            result = ("На нолик мы не делим")
+
+        return result
+
+    def precalculator(part):
+        if type(part) is str:
+            if "*" in part:
+                result = 1
+                for subpart in part.split("*"):
+                    result *= precalculator(subpart)
+                return result
+            elif "/" in part:
+                parts = list(map(precalculator, part.split("/")))
+                result = parts[0]
+                for subpart in parts[1:]:
+                    result /= subpart
+                return result
+            else:
+                return float(part)
+        elif type(part) is list:
+            for i in range(len(part)):
+                part[i] = precalculator(part[i])
+            return part[0] - sum(part[1:])
+
+    update.message.reply_text(calculator(string_to_calc))
+
 
 if __name__ == '__main__':
     main()
