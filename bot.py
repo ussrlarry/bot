@@ -2,7 +2,7 @@ from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 import ephem
 import time
 import logging
-from telepot.namedtuple import ReplyKeyboardMarkup
+from datetime import datetime
 
 logging.basicConfig(format='%(name)s - %(levelname)s - %(message)s',
                     level=logging.DEBUG,
@@ -19,6 +19,7 @@ def main():
     dp.add_handler(MessageHandler(Filters.text, talk_to_me))
     dp.add_handler(CommandHandler("start", greet_user))
     dp.add_handler(CommandHandler("planet", planet_constellation))
+    dp.add_handler(CommandHandler("ask_moon", next_fullmoon))
     dp.add_handler(CommandHandler("wordcount", word_counter))
     dp.add_handler(CommandHandler("dict_calc", dict_calculator))
     dp.add_handler(CommandHandler("simple_calc", simple_calculator))
@@ -45,6 +46,17 @@ def planet_constellation(bot, update):
         update.message.reply_text('Планета %s сейчас находится в созвездии %s' % (cutted_user_input, ephem.constellation(ephem_planet)[1]))
     except AttributeError:
         update.message.reply_text('Сорян, такой планеты пока не открыли')
+
+def next_fullmoon(bot, update):
+    user_text_get = update.message.text
+    cutted_user_input = user_text_get[10:]
+    remove_quotas = cutted_user_input[1:-1]
+    string_to_list = remove_quotas.split()
+    get_date = (string_to_list[-1])[0:-1]
+    user_date = datetime.strptime(get_date, '%Y-%m-%d')
+    final_date = str(datetime.strftime(user_date, '%Y/%m/%d'))
+    result = str(ephem.next_full_moon(final_date))
+    update.message.reply_text(result)
 
 def word_counter(bot, update):
     user_text_get = update.message.text
